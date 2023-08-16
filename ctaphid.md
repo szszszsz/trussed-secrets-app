@@ -1,8 +1,8 @@
 
 
-# Oath Authenticator Client
+# secrets app Client
 
-The [Oath Authenticator] application has been chosen as a good candidate due to being written in an extensive way, and
+The [secrets app] application has been chosen as a good candidate due to being written in an extensive way, and
 offered in the same language as the platform, thus guaranteeing high compatibility and maintainability.
 
 It offers HOTP and TOTP implementations ([RFC4226] and [RFC6238] respectively), with SHA1 and SHA256 hashes support. It
@@ -18,14 +18,14 @@ The protocol it uses - [YKOATH] - is using [ISO7816-4] commands for communicatio
 
 ## Protocol Description
 
-This implementation uses CTAPHID to transfer commands to the Oath Authenticator application, compiled into the Nitrokey
+This implementation uses CTAPHID to transfer commands to the secrets app application, compiled into the Nitrokey
 3 firmware. This transport was used to improve compatibility on platforms, where the default transport for this
 application, CCID, is not easily available (e.g. due to being taken by other services, or requiring Administrator
 privileges). In CTAPHID, a custom vendor command number was selected `0x70`, thus allowing for a compatible extension of
 any FIDO device.
 
 Below is a visualization of getting the OTP code from the device. First the ISO7816 message is created and encapsulated
-into CTAPHID message, which is unpacked on the device and passed further to the Oath Authenticator. Once parsed and
+into CTAPHID message, which is unpacked on the device and passed further to the secrets app. Once parsed and
 processed, the response is produced, which traverses the same way backwards, finally reaching Python client over
 CTAPHID.
 
@@ -38,7 +38,7 @@ sequenceDiagram
     FIDO2 device -->> Python Client : Response
 ```
 
-Following commands are accepted by the Oath Authenticator:
+Following commands are accepted by the secrets app:
 
 | Command   | Cls  | Ins  | P1     | P2   | Description                              |
 |-----------|------|------|--------|------|------------------------------------------|
@@ -172,7 +172,7 @@ These can be run against a USB/IP device simulation of Nitrokey 3.
 
 ## Client Application
 
-The Oath Authenticator can be reached through the described protocol over a pynitrokey CLI experimental interface. Excerpt from its help screen follows:
+The secrets app can be reached through the described protocol over a pynitrokey CLI experimental interface. Excerpt from its help screen follows:
 
 ```text
 $ nitropy nk3 otp
