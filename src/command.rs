@@ -35,17 +35,10 @@ pub enum Command<'l> {
     /// Register a new credential.
     Register(Register<'l>),
     /// Delete all credentials and rotate the salt.
-    Reset,
     /// Set a password.
     SetPassword(SetPassword<'l>),
     /// Validate the password (both ways).
     Validate(Validate<'l>),
-    /// Verify PIN through the backend
-    VerifyPin(VerifyPin<'l>),
-    /// Set PIN through the backend
-    SetPin(SetPin<'l>),
-    /// Change PIN through the backend
-    ChangePin(ChangePin<'l>),
     /// Reverse HOTP validation
     VerifyCode(VerifyCode<'l>),
     /// Send remaining data in the buffer
@@ -143,14 +136,6 @@ impl core::fmt::Debug for Select<'_> {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct SetPassword<'l> {
-    pub kind: oath::Kind,
-    pub algorithm: oath::Algorithm,
-    pub key: &'l [u8],
-    pub challenge: &'l [u8],
-    pub response: &'l [u8],
-}
 
 impl<'l, const C: usize> TryFrom<&'l Data<C>> for SetPassword<'l> {
     type Error = Status;
@@ -209,11 +194,6 @@ impl<'l, const C: usize> TryFrom<&'l Data<C>> for SetPassword<'l> {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct Validate<'l> {
-    pub response: &'l [u8],
-    pub challenge: &'l [u8],
-}
 
 impl<'l, const C: usize> TryFrom<&'l Data<C>> for Validate<'l> {
     type Error = Status;
@@ -277,10 +257,6 @@ impl<'l, const C: usize> TryFrom<&'l Data<C>> for VerifyCode<'l> {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct SetPin<'l> {
-    pub password: &'l [u8],
-}
 
 impl<'l, const C: usize> TryFrom<&'l Data<C>> for SetPin<'l> {
     type Error = Status;
@@ -351,11 +327,6 @@ impl<'l, const C: usize> TryFrom<&'l Data<C>> for GetCredential<'l> {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct ChangePin<'l> {
-    pub password: &'l [u8],
-    pub new_password: &'l [u8],
-}
 
 impl<'l, const C: usize> TryFrom<&'l Data<C>> for ChangePin<'l> {
     type Error = Status;
@@ -384,10 +355,6 @@ impl<'l, const C: usize> TryFrom<&'l Data<C>> for ChangePin<'l> {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct VerifyPin<'l> {
-    pub password: &'l [u8],
-}
 
 impl<'l, const C: usize> TryFrom<&'l Data<C>> for VerifyPin<'l> {
     type Error = Status;
