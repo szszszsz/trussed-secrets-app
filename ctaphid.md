@@ -22,7 +22,10 @@ This implementation uses CTAPHID to transfer commands to the Oath Authenticator 
 3 firmware. This transport was used to improve compatibility on platforms, where the default transport for this
 application, CCID, is not easily available (e.g. due to being taken by other services, or requiring Administrator
 privileges). In CTAPHID, a custom vendor command number was selected `0x70`, thus allowing for a compatible extension of
-any FIDO device.
+any FIDO device. The new command identifiers and their command IDs are as follows:
+
+- `HidCommand::Vendor(OTP_CCID)`: This command is used to handle the CTAPHID commands. The command ID is `0x70`.
+- `HidCommand::Vendor(OTP_CCID)`: This command is used to handle the CTAPHID commands. The command ID is `0x70`.
 
 Below is a visualization of getting the OTP code from the device. First the ISO7816 message is created and encapsulated
 into CTAPHID message, which is unpacked on the device and passed further to the Oath Authenticator. Once parsed and
@@ -40,13 +43,13 @@ sequenceDiagram
 
 Following commands are accepted by the Oath Authenticator:
 
-| Command   | Cls  | Ins  | P1     | P2   | Description                              |
-|-----------|------|------|--------|------|------------------------------------------|
-| Put       | 0x00 | 0x01 | 0x00   | 0x00 | Register a new OTP credential            |
-| Delete    | 0x00 | 0x02 | 0x00   | 0x00 | Delete a registered OTP credential       |
-| Reset     | 0x00 | 0x04 | 0xDE   | 0xAD | Remove all stored OTP credentials        |
-| List      | 0x00 | 0xA1 | 0x00   | 0x00 | List stored OTP credentials              |
-| Calculate | 0x00 | 0xA2 | 0x00   | 0x01 | Calculate an OTP code for the credential |
+| Command   | Cls  | Ins  | P1     | P2   | Parameters | Description                              |
+|-----------|------|------|--------|------|------------|------------------------------------------|
+| Put       | 0x00 | 0x01 | 0x00   | 0x00 | CredentialId, Key, Type, Digits, InitialCounter | Register a new OTP credential            |
+| Delete    | 0x00 | 0x02 | 0x00   | 0x00 | CredentialId | Delete a registered OTP credential       |
+| Reset     | 0x00 | 0x04 | 0xDE   | 0xAD | None | Remove all stored OTP credentials        |
+| List      | 0x00 | 0xA1 | 0x00   | 0x00 | None | List stored OTP credentials              |
+| Calculate | 0x00 | 0xA2 | 0x00   | 0x01 | CredentialId, Challenge | Calculate an OTP code for the credential |
 
 This is a standard ISO7816 encoding of the command and its parameters. The P1 and P2 are mostly unused, except for the
 case of Reset and Calculate commands. The class `cls` parameter is always `0`.
@@ -63,13 +66,13 @@ Same table, but graphically:
 
 #### Input
 
-| Command   | Cls  | Ins  | P1     | P2   | Description                              |
-|-----------|------|------|--------|------|------------------------------------------|
-| Put       | 0x00 | 0x01 | 0x00   | 0x00 | Register a new OTP credential            |
-
-| Parameters     | Type   | Description                                                                                |
-|----------------|--------|--------------------------------------------------------------------------------------------|
-| CredentialId   | Bytes  | The credential name, stored for the later reference and listing                            |
+| Command   | Cls  | Ins  | P1     | P2   | Parameters | Description                              |
+|-----------|------|------|--------|------|------------|------------------------------------------|
+| Put       | 0x00 | 0x01 | 0x00   | 0x00 | CredentialId, Key, Type, Digits, InitialCounter | Register a new OTP credential. This command is used to register a new OTP credential on the device. |
+| Delete    | 0x00 | 0x02 | 0x00   | 0x00 | CredentialId | Delete a registered OTP credential. This command is used to delete a registered OTP credential from the device. |
+| Reset     | 0x00 | 0x04 | 0xDE   | 0xAD | None | Remove all stored OTP credentials. This command is used to remove all stored OTP credentials from the device. |
+| List      | 0x00 | 0xA1 | 0x00   | 0x00 | None | List stored OTP credentials. This command is used to list all stored OTP credentials on the device. |
+| Calculate | 0x00 | 0xA2 | 0x00   | 0x01 | CredentialId, Challenge | Calculate an OTP code for the credential. This command is used to calculate an OTP code for a specific credential. |
 | Key            | Bytes  | The shared key in raw bytes                                                                |
 | Type*          | u8     | OtpKind "bitwiseOr" Hash algorithm. Values are described below. Prefixed to the Key field. |
 | Digits*        | u8     | Digits count. The common values are `6` and `8`. Prefixed to the Key field.                |
